@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { FaChevronRight } from "react-icons/fa";
 
@@ -6,13 +6,13 @@ const CarCard = ({ car }) => {
   //클릭 시 요청내역 관리 숨김-열기 상태값
   const [isShow, setIsShow] = useState(false);
 
-  //checkbox를 관리하는 객체
-  const [steps, setSteps] = useState({
+  //
+  const [checked, setChecked] = useState({
     1: false,
-    2: true,
-    3: true,
-    4: true,
-    5: true,
+    2: false,
+    3: false,
+    4: false,
+    5: false,
   });
 
   //check값을 관리하는 배열
@@ -32,16 +32,38 @@ const CarCard = ({ car }) => {
   //과정 관리하는 함수
   const clickCheckBox = (e) => {
     const num = Number(e.target.value);
-    //체크 활성화 시키는 함수
-
-    setSteps({ ...steps, [num]: true, [num + 1]: false });
-    if (num === 5) {
-      setSteps({ ...steps, [num]: true });
+    if (num !== 1 && checked[num - 1] === false) {
+      alert("전 단계를 완료해주세요");
+      return;
     }
+    //체크 활성화 시키는 함수
+    setChecked({ ...checked, [num]: true });
 
+    const progressStep = progress[num - 1];
     //fetch 함수
-    const sendProcess = progress[num - 1];
+    fetch(``, {
+      method: "GET",
+      headers: { "Content-type": "application/json" },
+      body: {
+        car_id: car.car_id,
+        progress: progressStep,
+      },
+    })
+      .then((res) => res.json())
+      .then((res) => console.log(res));
   };
+
+  //
+  useEffect(() => {
+    const checked = {
+      1: car.quote_requested !== null,
+      2: car.dealer_assigned !== null,
+      3: car.dealer_consulting !== null,
+      4: car.selling_requested !== null,
+      5: car.selling_completede !== null,
+    };
+    setChecked(checked);
+  }, []);
 
   return (
     <div>
@@ -55,8 +77,9 @@ const CarCard = ({ car }) => {
             <CheckInput
               type="checkbox"
               onClick={clickCheckBox}
-              disabled={steps[1]}
+              disabled={checked[1]}
               value={1}
+              checked={checked[1]}
             />
             <InputMessage>판매 완료</InputMessage>
           </QuoteRequested>
@@ -64,8 +87,9 @@ const CarCard = ({ car }) => {
             <CheckInput
               type="checkbox"
               onClick={clickCheckBox}
-              disabled={steps[2]}
+              disabled={checked[2]}
               value={2}
+              checked={checked[2]}
             />
             <InputMessage>판매 요청</InputMessage>
           </DealerAssigned>
@@ -73,8 +97,9 @@ const CarCard = ({ car }) => {
             <CheckInput
               type="checkbox"
               onClick={clickCheckBox}
-              disabled={steps[3]}
+              disabled={checked[3]}
               value={3}
+              checked={checked[3]}
             />
             <InputMessage>딜러 방문 상담</InputMessage>
           </DealerConsulting>
@@ -82,8 +107,9 @@ const CarCard = ({ car }) => {
             <CheckInput
               type="checkbox"
               onClick={clickCheckBox}
-              disabled={steps[4]}
+              disabled={checked[4]}
               value={4}
+              checked={checked[4]}
             />
             <InputMessage>담당 딜러 배정</InputMessage>
           </SellingRequested>
@@ -91,8 +117,9 @@ const CarCard = ({ car }) => {
             <CheckInput
               type="checkbox"
               onClick={clickCheckBox}
-              disabled={steps[5]}
+              disabled={checked[5]}
               value={5}
+              checked={checked[5]}
             />
             <InputMessage>견적요청 접수</InputMessage>
           </SellingComplete>

@@ -20,18 +20,16 @@ function MapInfo({ addr, setAddr, postcodeAddr }) {
   }, [postcodeAddr]);
 
   useEffect(() => {
+    let lat = 0;
+    let lng = 0;
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          let lat =
+          lat =
             coords !== undefined ? coords.getLat() : position.coords.latitude;
-          let lng =
+          lng =
             coords !== undefined ? coords.getLng() : position.coords.longitude;
-
-          if (lat === null || lng === null) {
-            lat = 37.49929244623464;
-            lng = 127.0293917149315;
-          }
           getAddr(lat, lng, setAddr);
           setState((prev) => ({
             ...prev,
@@ -56,6 +54,21 @@ function MapInfo({ addr, setAddr, postcodeAddr }) {
         center: {
           lat: coords.getLat(),
           lng: coords.getLng(), // 경도
+        },
+        isLoading: false,
+      }));
+    }
+
+    //geolpcation api가 브라우저로 인해 막혔을때 고정값으로 수정
+    if (lat === 0 || lng === 0) {
+      lat = coords !== undefined ? coords.getLat() : 37.49929244623464;
+      lng = coords !== undefined ? coords.getLng() : 127.0293917149315;
+      getAddr(lat, lng, setAddr);
+      setState((prev) => ({
+        ...prev,
+        center: {
+          lat: lat,
+          lng: lng,
         },
         isLoading: false,
       }));
